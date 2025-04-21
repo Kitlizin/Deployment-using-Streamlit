@@ -5,7 +5,7 @@ from PIL import Image, ImageOps
 
 @st.cache_resource
 def load_model():
-    model = tf.keras.models.load_model('best_final_model_pedestrian.h5')  # Update with your actual filename
+    model = tf.keras.models.load_model('best_final_model_{best_model_name}.h5')  # Update with your actual filename
     return model
 
 model = load_model()
