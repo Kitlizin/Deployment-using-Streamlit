@@ -1,33 +1,34 @@
 import streamlit as st
 import tensorflow as tf
-
-@st.cache(allow_output_mutation=True)
-def load_model():
-  model=tf.keras.models.load_model('best_final_model_{best_model_name}.h5')
-  return model
-model=load_model()
-st.write("""
-# PEDESTRIAN OR NO PEDESTRIAN Detection System"""
-)
-file=st.file_uploader("Choose Road photo from computer",type=["jpg","png"])
-
-import cv2
-from PIL import Image,ImageOps
 import numpy as np
+from PIL import Image, ImageOps
+
+@st.cache_resource
+def load_model():
+    model = tf.keras.models.load_model('best_final_model_pedestrian.h5')  # Update with your actual filename
+    return model
+
+model = load_model()
+
+st.title("Pedestrian or No Pedestrian Detection System")
+
+file = st.file_uploader("Upload a road photo", type=["jpg", "png"])
+
 def import_and_predict(image_data, model):
-    size = (64, 64)
-    image = ImageOps.fit(image_data, size, Image.Resampling.LANCZOS)
-    img = np.asarray(image).astype(np.float32) / 255.0  # Normalize
-    img_reshape = img[np.newaxis, ...]
+    size = (64, 64)  
+    image = image_data.convert("RGB")  
+    image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
+    img_array = np.asarray(image).astype(np.float32) / 255.0
+    img_reshape = np.expand_dims(img_array, axis=0)  
     prediction = model.predict(img_reshape)
     return prediction
 
 if file is None:
-    st.text("Please upload an image file")
+    st.info("Please upload an image file.")
 else:
-    image=Image.open(file)
-    st.image(image,use_column_width=True)
-    prediction=import_and_predict(image,model)
-    class_names=['pedestrian', 'no pedestrian']
-    string="OUTPUT : "+class_names[np.argmax(prediction)]
-    st.success(string)
+    image = Image.open(file)
+    st.image(image, caption='Uploaded Image', use_column_width=True)
+    prediction = import_and_predict(image, model)
+    class_names = ['pedestrian', 'no pedestrian']
+    result = f"**OUTPUT:** {class_names[np.argmax(prediction)]}"
+    st.success(result)
