@@ -9,7 +9,7 @@ def load_model():
 model = load_model()
 
 st.write("""
-# # PEDESTRIAN OR NO PEDESTRIAN Detection System""")
+# PEDESTRIAN OR NO PEDESTRIAN Detection System""")
 file = st.file_uploader("Choose weather photo from computer", type=["jpg", "png"])
 
 import cv2
