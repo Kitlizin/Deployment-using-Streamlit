@@ -2,33 +2,39 @@ import streamlit as st
 import tensorflow as tf
 from PIL import Image, ImageOps
 import numpy as np
+import cv2
 
-@st.cache_resource
-def load_model():
-    # Replace with your actual model filename
-    model = tf.keras.models.load_model('best_final_model_{best_model_name}.h5')
-    return model
+def main():
+    @st.cache_resource
+    def load_model():
+        model = tf.keras.models.load_model('best_final_model_{best_model_name}.h5')
+        return model
 
-model = load_model()
+    model = load_model()
+    
+    st.write("# PEDESTRIAN OR NO PEDESTRIAN Detection System")
+    file = st.file_uploader("Choose a photo from your computer", type=["jpg", "png"])
 
-st.write("# PEDESTRIAN OR NO PEDESTRIAN Detection System")
-file = st.file_uploader("Choose a photo from your computer", type=["jpg", "png"])
+    def import_and_predict(image_data, model):
+        target_size = model.input_shape[1:3]
+        image = ImageOps.fit(image_data, target_size, Image.Resampling.LANCZOS)
+        img = np.asarray(image).astype(np.float32) / 255.0
 
-def import_and_predict(image_data, model):
-    size = (64, 64)  # Update this to match your model's expected input size
-    image = ImageOps.fit(image_data, size, Image.Resampling.LANCZOS)
-    img = np.asarray(image).astype(np.float32) / 255.0
-    img_reshape = np.expand_dims(img, axis=0)
-    prediction = model.predict(img_reshape)
-    return prediction
+        if model.input_shape[-1] == 1:
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+            img = np.expand_dims(img, axis=-1)
+        
+        img_reshape = np.expand_dims(img, axis=0)
+        return model.predict(img_reshape)
 
-if file is None:
-    st.text("Please upload an image file")
-else:
-    # Convert image to RGB to handle alpha channels
-    image = Image.open(file).convert('RGB')
-    st.image(image, use_container_width=True)  # <-- Corrected parameter here
-    prediction = import_and_predict(image, model)
-    class_names = ['pedestrian', 'no pedestrian']
-    string = f"The output is: {class_names[np.argmax(prediction)]}"
-    st.success(string)
+    if file is None:
+        st.text("Please upload an image file")
+    else:
+        image = Image.open(file).convert('RGB')
+        st.image(image, use_container_width=True)
+        prediction = import_and_predict(image, model)
+        class_names = ['pedestrian', 'no pedestrian']
+        st.success(f"The output is: {class_names[np.argmax(prediction)]}")
+
+if __name__ == "__main__":
+    main()
