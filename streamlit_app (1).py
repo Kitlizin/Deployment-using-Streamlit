@@ -30,6 +30,6 @@ else:
   image = Image.open(file)
   st.image(image, use_container_width=True)  
   prediction = import_and_predict(image, model)
-  class_names = ['pedestrian', 'no pedestrian']
+  class_names = ['no pedestrian', 'pedestrian']
   string = "The output is: " + class_names[np.argmax(prediction)]
   st.success(string)
