@@ -27,7 +27,7 @@ if file is None:
 else:
     # Convert image to RGB to handle alpha channels
     image = Image.open(file).convert('RGB')
-    st.image(image, use_column_width=True)
+    st.image(image, use_container_width=True)  # <-- Corrected parameter here
     prediction = import_and_predict(image, model)
     class_names = ['pedestrian', 'no pedestrian']
     string = f"The output is: {class_names[np.argmax(prediction)]}"
